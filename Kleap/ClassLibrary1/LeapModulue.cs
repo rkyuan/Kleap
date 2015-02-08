@@ -14,6 +14,7 @@ namespace Kleap
         float yaw = 0;
         float pitch = 0;
         float roll = 0;
+        bool controlling = false;
         SampleListener listener;
         Leap.Controller controller;
 
@@ -26,8 +27,8 @@ namespace Kleap
         }
         void Start()
         {
-            print("controls started");
-            FlightGlobals.ActiveVessel.OnFlyByWire += MyAutopilotFunction;
+            print("started");
+            
         }
 
         void OnDestroy()
@@ -38,7 +39,18 @@ namespace Kleap
 
         void Update()
         {
-            print(listener.throttle);
+            if (listener.active && !controlling)
+            {
+                FlightGlobals.ActiveVessel.OnFlyByWire += MyAutopilotFunction;
+                controlling = true;
+                print("leap enabled");
+            }
+            if (!listener.active && controlling)
+            {
+                FlightGlobals.ActiveVessel.OnFlyByWire -= MyAutopilotFunction;
+                controlling = false;
+                print("leap disabled");
+            }
         }
         
        
@@ -64,6 +76,8 @@ namespace Kleap
             s.pitch = listener.pitch*(float)1.8;
             s.roll = listener.roll*(float)0.6;
             s.mainThrottle = listener.throttle;
+            s.wheelThrottle = listener.throttle;
+            s.wheelSteer = listener.yaw*-1.6f;
         }
     }
 

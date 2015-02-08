@@ -16,6 +16,7 @@ class SampleListener : Listener
     public float roll;
     public float yaw;
     public float throttle =0;
+    public bool active = false;
 
     private void SafeWriteLine(String line)
     {
@@ -64,8 +65,11 @@ class SampleListener : Listener
         //SafeWriteLine("\n");
 
         //foreach (Hand hand in frame.Hands)
-        Hand hand = frame.Hands.Rightmost;
-        //{
+        if (!frame.Hands.IsEmpty)
+        {
+            active = true;
+            Hand hand = frame.Hands.Rightmost;
+            //{
             //SafeWriteLine("  Hand id: " + hand.Id
             //            + ", palm position: " + hand.PalmPosition);
             // Get the hand's normal vector and direction
@@ -75,41 +79,49 @@ class SampleListener : Listener
             {
                 throttle -= 0.002f * hand.PalmPosition.z / 50;
             }
-            if (throttle > 1){ throttle = 1;}
+            if (throttle > 1) { throttle = 1; }
             if (throttle < 0) { throttle = 0; }
             pitch = direction.Pitch / (float)Math.PI;
             roll = normal.Roll / (float)Math.PI * -1;
             yaw = direction.Yaw / (float)Math.PI;
-            // Calculate the hand's pitch, roll, and yaw angles
-            //SafeWriteLine("  Hand pitch: " + direction.Pitch * 180.0f / (float)Math.PI + " degrees, "
-            //            + "roll: " + normal.Roll * 180.0f / (float)Math.PI + " degrees, "
-            //            + "yaw: " + direction.Yaw * 180.0f / (float)Math.PI + " degrees");
+        }
+        else
+        {
+            active = false;
+            pitch = 0;
+            roll = 0;
+            yaw = 0;
+        }
+        // Calculate the hand's pitch, roll, and yaw angles
+        //SafeWriteLine("  Hand pitch: " + direction.Pitch * 180.0f / (float)Math.PI + " degrees, "
+        //            + "roll: " + normal.Roll * 180.0f / (float)Math.PI + " degrees, "
+        //            + "yaw: " + direction.Yaw * 180.0f / (float)Math.PI + " degrees");
 
-            // Get the Arm bone
-            //Arm arm = hand.Arm;
-            //SafeWriteLine("  Arm direction: " + arm.Direction
-            //            + ", wrist position: " + arm.WristPosition
-            //            + ", elbow position: " + arm.ElbowPosition);
+        // Get the Arm bone
+        //Arm arm = hand.Arm;
+        //SafeWriteLine("  Arm direction: " + arm.Direction
+        //            + ", wrist position: " + arm.WristPosition
+        //            + ", elbow position: " + arm.ElbowPosition);
 
-            // Get fingers
-            //foreach (Finger finger in hand.Fingers)
-            //{
-            //    SafeWriteLine("    Finger id: " + finger.Id
-            //                + ", " + finger.Type().ToString()
-            //                + ", length: " + finger.Length
-            //                + "mm, width: " + finger.Width + "mm");
+        // Get fingers
+        //foreach (Finger finger in hand.Fingers)
+        //{
+        //    SafeWriteLine("    Finger id: " + finger.Id
+        //                + ", " + finger.Type().ToString()
+        //                + ", length: " + finger.Length
+        //                + "mm, width: " + finger.Width + "mm");
 
-            //    // Get finger bones
-            //    Bone bone;
-            //    foreach (Bone.BoneType boneType in (Bone.BoneType[])Enum.GetValues(typeof(Bone.BoneType)))
-            //    {
-            //        bone = finger.Bone(boneType);
-            //        SafeWriteLine("      Bone: " + boneType
-            //                    + ", start: " + bone.PrevJoint
-            //                    + ", end: " + bone.NextJoint
-            //                    + ", direction: " + bone.Direction);
-            //    }
-            //}
+        //    // Get finger bones
+        //    Bone bone;
+        //    foreach (Bone.BoneType boneType in (Bone.BoneType[])Enum.GetValues(typeof(Bone.BoneType)))
+        //    {
+        //        bone = finger.Bone(boneType);
+        //        SafeWriteLine("      Bone: " + boneType
+        //                    + ", start: " + bone.PrevJoint
+        //                    + ", end: " + bone.NextJoint
+        //                    + ", direction: " + bone.Direction);
+        //    }
+        //}
 
         //}
 
