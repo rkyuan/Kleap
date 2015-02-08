@@ -4,29 +4,44 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using Leap;
 
 namespace Kleap
 {
-    public class LeapModulue : PartModule
+    [KSPAddon(KSPAddon.Startup.Flight, false)]
+    public class LeapPlugin : MonoBehaviour
     {
-        SampleListener listener = new SampleListener();
-        Leap.Controller controller = new Leap.Controller();
-
-        public override void OnAwake()
-        {
-            controller.AddListener(listener);
-            base.OnAwake();
-        }
-
-        public override void OnStart(StartState state)
-        {
-            print("mod loaded!");
-            base.OnStart(state);
-        }
-
         float yaw = 0;
         float pitch = 0;
         float roll = 0;
+        SampleListener listener;
+        Leap.Controller controller;
+
+        void Awake()
+        {
+            listener = new SampleListener();
+            controller = new Leap.Controller();
+            controller.AddListener(listener);
+            print("set up the leap");
+        }
+        void Start()
+        {
+            print("controls started");
+            FlightGlobals.ActiveVessel.OnFlyByWire += MyAutopilotFunction;
+        }
+
+        void OnDestroy()
+        {
+            controller.RemoveListener(listener);
+            controller.Dispose();
+        }
+
+        void Update()
+        {
+            print(listener.throttle);
+        }
+        
+       
 
         //[KSPEvent(active=true, guiActive = true, guiActiveEditor = true, guiName = "dispVals")]
         //public void dispVals()
@@ -34,19 +49,21 @@ namespace Kleap
         //    Events["dispVals"].guiName = "stuff";
         //}
 
-        public override void OnUpdate()
-        {
-            pitch = listener.getp();
-            roll = listener.getr();
-            yaw = listener.gety();
-            vessel.OnFlyByWire += MyAutopilotFunction;
-            base.OnUpdate();
-        }
+        //void Update()
+        //{
+        //    pitch = listener.getp();
+        //    roll = listener.getr();
+        //    yaw = listener.gety();
+        //    FlightGlobals.ActiveVessel.OnFlyByWire += MyAutopilotFunction;
+        //    base.OnUpdate();
+        //}
+
         void MyAutopilotFunction(FlightCtrlState s) 
         { 
-            s.yaw = yaw/3;
-            s.pitch = pitch/3;
-            s.roll = roll/3;
+            s.yaw = listener.yaw;
+            s.pitch = listener.pitch*(float)1.8;
+            s.roll = listener.roll*(float)0.6;
+            s.mainThrottle = listener.throttle;
         }
     }
 

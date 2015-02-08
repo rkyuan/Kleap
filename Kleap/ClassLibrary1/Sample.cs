@@ -12,12 +12,10 @@ using Leap;
 class SampleListener : Listener
 {
     private Object thisLock = new Object();
-    float pitch = 0;
-    float roll = 0;
-    float yaw = 0;
-    public float getp() { return pitch; }
-    public float getr() { return roll; }
-    public float gety() { return yaw; }
+    public float pitch;
+    public float roll;
+    public float yaw;
+    public float throttle =0;
 
     private void SafeWriteLine(String line)
     {
@@ -63,7 +61,7 @@ class SampleListener : Listener
         //            + ", fingers: " + frame.Fingers.Count
         //            + ", tools: " + frame.Tools.Count
         //            + ", gestures: " + frame.Gestures().Count);
-        SafeWriteLine("\n");
+        //SafeWriteLine("\n");
 
         //foreach (Hand hand in frame.Hands)
         Hand hand = frame.Hands.Rightmost;
@@ -73,8 +71,14 @@ class SampleListener : Listener
             // Get the hand's normal vector and direction
             Vector normal = hand.PalmNormal;
             Vector direction = hand.Direction;
+            if (hand.PalmPosition.z > 60 || hand.PalmPosition.z < -60)
+            {
+                throttle -= 0.002f * hand.PalmPosition.z / 50;
+            }
+            if (throttle > 1){ throttle = 1;}
+            if (throttle < 0) { throttle = 0; }
             pitch = direction.Pitch / (float)Math.PI;
-            roll = normal.Roll / (float)Math.PI;
+            roll = normal.Roll / (float)Math.PI * -1;
             yaw = direction.Yaw / (float)Math.PI;
             // Calculate the hand's pitch, roll, and yaw angles
             //SafeWriteLine("  Hand pitch: " + direction.Pitch * 180.0f / (float)Math.PI + " degrees, "
